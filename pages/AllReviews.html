@@ -1,0 +1,76 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+            integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+            crossorigin="anonymous">
+    </script>
+    <script src="../Scripts/ajaxCallsWithKey.js"></script>
+    <script src="../Scripts/ajaxCalls.js"></script>
+    <script>
+        $(document).ready(function () {
+
+            ajaxCall("GET", "../api/Reviews", "", successGCB, errorGCB)
+
+        });
+
+        function successGCB(reviewList) {
+            console.log(reviewList);
+
+            str = ""
+            str +="<table border=1px solid><tr><td>Article Id</td><td>Criticizer Name</td><td>Email</td><td>publish date</td><td>Rank</td><td>Criticize</td></tr>"
+            
+                    
+                
+            
+            for (var i = 0; i < reviewList.length; i++) {
+                str += "<tr>"
+                str += "<td>" + reviewList[i].ArticleId + "</td > ";
+                str += "<td>" + reviewList[i].CriticizerName + "</td > ";
+                str += "<td>" + reviewList[i].Email + "</td > ";
+                str += "<td>" + reviewList[i].Date + "</td > ";
+                str += "<td>" + reviewList[i].Rank + "</td > ";
+                str += "<td>" + reviewList[i].Criticize + "</td > ";
+                str += " </tr>";
+            }
+            str += "</table >"
+
+            $("#ph").append(str);
+
+        }
+
+        function errorGCB(err) {
+            console.log(err);
+        }
+    </script>
+  
+
+</head>
+<body>
+    
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">menu</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a class="nav-link" href="view.html">view <span class="sr-only"></span></a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="insert1.html">insert article <span class="sr-only"></span></a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+
+    <div id="ph">
+
+    </div>
+</body>
+</html>

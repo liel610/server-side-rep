@@ -1,0 +1,204 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+            integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+            crossorigin="anonymous">
+    </script>
+    <script src="../Scripts/ajaxCallsWithKey.js"></script>
+    <script src="../Scripts/ajaxCalls.js"></script>
+
+
+    <script>
+        $(document).ready(function () {
+            $("#getTV").click(getTV);
+
+            
+        });
+
+        function getTV() {
+            var name = $("#tvShowName").val();
+            console.log(name);
+            let apiCall = "https://imdb8.p.rapidapi.com/title/find?q=" + name;
+
+            ajaxCall2("GET", apiCall, "", getTVSuccessCB, getTVErrorCB);
+        }
+
+        function getTVSuccessCB(tv) {
+            console.log(tv);//returns here
+            arrID = tv.results[0].id.split("/");
+            console.log(arrID);
+            getArticle(arrID[2]);
+        }
+
+        function getTVErrorCB(err) {
+            console.log(err);
+        }
+
+        
+
+        function getArticle(tvid) {
+            tvidsave = tvid;
+            console.log(tvid);
+            console.log(tvidsave);
+            let lim = 5;
+            let apiCall = "https://imdb8.p.rapidapi.com/title/get-news?tconst=" + tvid + "&limit=" + lim;
+            function sendToJSON() {
+                return tvidsave;
+            }
+            ajaxCall2("GET", apiCall, "", getArticleSuccessCB, getArticleErrorCB);
+        }
+
+        function getArticleSuccessCB(articles) {
+
+            allarticles = articles;
+            console.log(articles);//returns here
+
+            str = "<table border= 1px solid><tr><td>title</td><td>shortcut</td><td>lable</td><td>publish date</td><td>image</td><td>link</td><td>BTN</td></tr><tr>"
+            for (var i = 0; i < articles.items.length; i++)
+            {
+                str += "<td>"
+                str += articles.items[i].head
+                str += "</td>"
+                str +="<td>"
+                str +=   articles.items[i].body
+                str +="</td>"
+
+                str +="<td>"
+                str += articles.items[i].source.label
+                str +="</td>"
+                str += "<td>"
+                arrdate = articles.items[i].publishDateTime.split("T")
+
+                str += arrdate[0];
+                str += "</td>"
+                str +="<td>"
+                str += "<img src=" + articles.items[i].image.url + 'width="200" height="200" margin-left: auto margin-right: auto>'
+                str += "</td>"
+                str +="<td>"
+                str += articles.items[i].link
+                str += "</td>"
+                str += "<td>"
+                
+                str += "<button onclick='ClickBTNadd("+i+")'>add article</button>"
+                
+                str += "</td>"
+                str += "</tr>"
+
+
+            }
+            str += "</table>"
+            console.log(str)
+            $("#ph").append(str);
+        }
+
+        function getArticleErrorCB(err) {
+            console.log(err);
+        }
+
+
+        function ClickBTNadd(index)
+        {
+            let arrdate = allarticles.items[index].publishDateTime.split("T")
+            date = arrdate[0];
+            arrID1 = allarticles.id.split("/");
+            idart = arrID1[2];
+            
+
+            arraid = allarticles.items[index].id.split("/")
+            idart1 = arraid[3];
+            console.log(idart1);
+            /*tvNewSAVE=sendToJSON();*/
+            myArticle = {
+                TVid: idart,
+                TVname: allarticles.label,
+                ArticleTitle: allarticles.items[index].head,
+                ArticleShortcut: allarticles.items[index].body,
+                ArticleOrigin: allarticles.items[index].source.label,
+                DateOfPublish: date,
+                //ArticleImage: "<img src=" + allarticles.items[index].image.url + 'width="200" height="200" margin-left: auto margin-right: auto>',
+                ArticleImage: allarticles.items[index].image.url,
+                LinkToArticle: allarticles.items[index].link,
+                ArticleId: idart1
+
+            }
+
+            ajaxCall("POST", "../api/Articles", JSON.stringify(myArticle), postSCB, postECB);
+        }
+
+        function postSCB(arr) {
+            console.log(arr)
+        }
+
+        function postECB() {
+            console.log("post eror")
+        }
+
+
+        
+
+    </script>
+</head>
+<body>
+
+    
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">menu</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a class="nav-link" href="view.html">view <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="AllReviews.html">all reviews <span class="sr-only">(current)</span></a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <input type="text" id="tvShowName" value="friends" />
+    <button id="getTV">Get TV Show</button>
+    <div id="ph"> </div>
+    <!--<table>
+        <tr>
+            <td>title</td>
+            <td>shortcut</td>
+            <td>lable</td>
+            <td>publish date</td>
+            <td>image</td>
+            <td>link</td>
+            <td>BTN</td>
+        </tr>
+        <tr>
+            <td>
+                articles.items[i].head
+            </td>
+            <td>
+                articles.items[i].body
+            </td>
+
+            <td>
+                articles.items[i].source.label
+            </td>
+            <td>
+                articles.items[i].publishDateTime
+            </td>
+            <td>
+                articles.items[i].image.url
+            </td>
+            <td>
+                articles.items[i].link
+            </td>
+            <td>
+                <button>add article</button>
+            </td>
+
+        </tr>
+    </table>-->
+</body>
+</html>

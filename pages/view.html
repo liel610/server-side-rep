@@ -1,0 +1,303 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+            integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+            crossorigin="anonymous">
+    </script>
+    <script src="../Scripts/ajaxCallsWithKey.js"></script>
+    <script src="../Scripts/ajaxCalls.js"></script>
+
+   
+    <script>
+        $(document).ready(function () {
+
+            ajaxCall("GET", "../api/Articles", "", successGCB, errorGCB)
+
+            //document.getElementById("popup").style.visibility = "hidden"
+            //$('#myModal').on('shown.bs.modal', function () {
+            //    $('#myInput').trigger('focus')
+            //})
+
+           // $("#reviewDetails").submit(sendTofes);
+            $(document).on("submit", "#reviewDetails", sendTofes);
+           
+        });
+
+        function successGCB(namelst)
+        {
+            
+            str = "";
+            str += "<select onChange=TVclickBTN(this.value)>";
+            str += "<option>  pick TV </option>"
+            if (namelst != null)
+            {
+                for (var i = 0; i < namelst.length; i++)
+                {
+
+                    str += "<option value='" + namelst[i] + "'>" + namelst[i] + "</option>"
+                }
+                str += "</select>";
+            }
+            else
+            {
+                str = "no article in the list"
+            }
+
+            $("#phArticle").append(str);
+        }
+
+
+        function errorGCB(art) {
+            console.log("error");
+        }
+
+
+
+        function TVclickBTN(tvname) {
+            console.log(tvname)
+            url = "../api/Articles?TVname=" + tvname;
+            ajaxCall("GET", url, "", getSCB, getECB);
+        }
+
+
+        function getSCB(speclist) {
+            allspecarticles = speclist;
+            console.log(speclist);
+
+
+            str = "<table border= 1px solid><tr><td>title</td><td>shortcut</td><td>lable</td><td>publish date</td><td>image</td><td>link</td><td>BTN</td></tr><tr>"
+            for (var i = 0; i < speclist.length; i++) {
+                str += "<td>"
+                str += speclist[i].ArticleTitle
+                str += "</td>"
+                str += "<td>"
+                str += speclist[i].ArticleShortcut
+                str += "</td>"
+
+                str += "<td>"
+                str += speclist[i].ArticleOrigin
+                str += "</td>"
+                str += "<td>"
+
+                str += speclist[i].DateOfPublish;
+                str += "</td>"
+                str += "<td>"
+                /*"<img src=" + allarticles.items[index].image.url + 'width="200" height="200" margin-left: auto margin-right: auto>'*/
+                str += "<img src="
+                str += speclist[i].ArticleImage
+                str += ' width="200" height="200" margin-left: auto margin-right: auto>'
+                str += "</td>"
+                str += "<td>"
+                str += speclist[i].LinkToArticle
+                str += "</td>"
+                str += "<td>"
+
+                str += '<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" id="BTNrev' + i + '"> add review </button>'
+                
+                str += "</tr>"
+
+                $(document).on("click", "#BTNrev" + i, speclist[i].ArticleId, ClickBTNrev);
+            }
+            str += "</table>"
+
+            
+            $("#phArticle").append(str);
+
+        }
+
+        function getECB(err) {
+            console.log(err)
+        }
+
+        function ClickBTNrev(articleid)
+        {
+            console.log(articleid.data)
+           
+            $("#idTB").val(articleid.data)
+            /*document.getElementById("popup").style.visibility = "visible";*/
+            //str = ""
+            //str += '<div class="modal" tabindex="-1" role="dialog" id="myModal">'
+            //str += '    <div class="modal-dialog" role="document">'
+            //str += '        <div class="modal-content">'
+            //str += '            <div class="modal-header">'
+            //str += '                <h5 class="modal-title">insert a review</h5>'
+            //str += '                <button type="button" class="close" data-dismiss="modal" aria-label="Close">'
+            //str += '                   <span aria-hidden="true">&times;</span>'
+            //str += '                </button>'
+            //str += '           </div>'
+            //str += '            <div class="modal-body">'
+            //str += '                <p>to insert a new review press the insert button</p>'
+            //str += '            </div>'
+            //str += '            <div class="modal-footer">'
+            //str += '                <button type="button" class="btn btn-primary">insert</button>'
+            //str += '                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>'
+            //str += '            </div>'
+            //str += '        </div>'
+            //str += '   </div>'
+            //str += '</div>'
+
+            //$("#ph").append(str);
+        }
+
+
+
+
+        function sendTofes() {
+           
+
+            let id = $("#idTB").val();
+            let name = $("#nameTB").val();
+            let email = $("#emailTB").val();
+            let rank = $("#rankTB").val();
+            let review = $("#reviewTB").val();
+
+            var today = new Date();
+            var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+            
+            myreview = {
+                ArticleId: id,
+                CriticizerName: name,
+                Email: email,
+                Date: date,
+                Rank: rank,
+                Criticize: review
+            }
+            console.log(myreview)
+            ajaxCall("POST", "../api/Reviews", JSON.stringify(myreview), postSCB, postECB);
+            return false;
+        }
+
+        function postSCB(num) {
+
+            alert("your review has submited")
+        }
+        function postECB() {
+            alert("error - not submited")
+        }
+
+    </script>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light" >
+        <a class="navbar-brand" href="#">menu</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a class="nav-link" href="AllReviews.html">all reviews<span class="sr-only"></span></a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="insert1.html">insert article <span class="sr-only"></span></a>
+                </li>
+
+            </ul>
+        </div>
+    </nav>
+
+
+    <div id="ph"></div>
+    <div id="phArticle"></div>
+
+
+    <!--<div class="modal" tabindex="-1" role="dialog" id="popup">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Modal body text goes here.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+        Launch demo modal
+    </button>
+
+     Modal
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    ...
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>-->
+    <!--פופאפ עם טופס-->
+
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">New message</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="reviewDetails">
+                        <div class="form-group">
+                            <label for="recipient-name" class="col-form-label">your name:</label>
+                            <input type="text" id="nameTB" maxlength="30" class="form-control" required="required" />
+                        </div>
+                        <div class="form-group">
+                            <label for="message-text" class="col-form-label">email:</label>
+                            <input type="email" id="emailTB" class="form-control" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="message-text" class="col-form-label">rank (1-5):</label>
+                            <input type="range" id="rankTB" min="1" max="5" step="1" required class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label for="message-text" class="col-form-label">review:</label>
+                            <input type="text" id="reviewTB" required maxlength="200" minlength="10" class="form-control" />
+                        </div>
+                        <div class="form-group">
+
+                            <input type="text" id="idTB" class="form-control" style="visibility:hidden" />
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">submit review</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
